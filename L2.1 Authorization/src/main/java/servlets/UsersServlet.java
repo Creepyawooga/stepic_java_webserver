@@ -1,6 +1,7 @@
 package servlets;
 
 import accounts.AccountService;
+import accounts.UserProfile;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -8,42 +9,43 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * @author v.chibrikov
- *         <p>
- *         Пример кода для курса на https://stepic.org/
- *         <p>
- *         Описание курса и лицензия: https://github.com/vitaly-chibrikov/stepic_java_webserver
- */
-public class UsersServlet extends HttpServlet {
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"}) //todo: remove after module 2 home work
+public class UsersServlet  extends HttpServlet {
     private final AccountService accountService;
 
     public UsersServlet(AccountService accountService) {
         this.accountService = accountService;
     }
 
-    //get public user profile
-    public void doGet(HttpServletRequest request,
-                      HttpServletResponse response) throws ServletException, IOException {
-        //todo: module 2 home work
-    }
+    // sign up
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String login = request.getParameter("login");
+        String password = request.getParameter("password");
 
-    //sign up
-    public void doPost(HttpServletRequest request,
-                       HttpServletResponse response) throws ServletException, IOException {
-        //todo: module 2 home work
-    }
+        if (login == null || password == null) {
+            response.setContentType("text/plain");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("Invalid login or password");
+            return;
+        }
 
-    //change profile
-    public void doPut(HttpServletRequest request,
-                      HttpServletResponse response) throws ServletException, IOException {
-        //todo: module 2 home work
-    }
+        if (accountService.getUserByLogin(login) != null) {
+            response.setContentType("text/plain");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("User already exists");
+            return;
+        }
 
-    //unregister
-    public void doDelete(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException {
-        //todo: module 2 home work
+        // Создаем профиль пользователя с использованием конструктора, который принимает только логин
+        UserProfile userProfile = new UserProfile(login);
+
+        // Устанавливаем пароль для профиля
+        userProfile.setPass(password);
+
+        // Добавляем пользователя в сервис аккаунтов
+        accountService.addNewUser(userProfile);
+
+        response.setContentType("text/plain");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("User registered successfully: " + login);
     }
 }
