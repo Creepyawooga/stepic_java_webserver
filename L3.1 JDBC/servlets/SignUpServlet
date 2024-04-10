@@ -1,0 +1,31 @@
+package servlets;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class SignUpServlet extends HttpServlet {
+    private final Map<String, String> users = new HashMap<>();
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String login = request.getParameter("login");
+        String password = request.getParameter("password");
+
+        if (login == null || password == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        if (users.containsKey(login)) {
+            response.setStatus(HttpServletResponse.SC_CONFLICT); // Пользователь уже существует
+            return;
+        }
+
+        users.put(login, password);
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+}
